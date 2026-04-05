@@ -362,36 +362,40 @@ function doUpgrade() {
   });
 }
 
-// ==================== ЗАПУСК ====================
+// ==================== ЗАПУСК (ДИАГНОСТИКА ДЛЯ ТЕЛЕФОНА) ====================
 (async () => {
   await loadCards();
-
-  console.log("WebApp запущен. User ID:", userId);
+  
+  // Показываем, что сайт вообще загрузился
+  console.log("WebApp открыт");
 
   if (userId) {
-    console.log("📤 Запрашиваем инвентарь у бота...");
+    alert("WebApp открыт\nUser ID: " + userId + "\nСейчас запрашиваем инвентарь...");
     loadInventory();
   } else {
-    console.log("⚠️ Тестовый режим без Telegram");
-    inventory = ['card_001', 'card_006', 'card_009', 'card_018', 'card_021'];
+    alert("WebApp открыт (тестовый режим без Telegram)");
+    inventory = ['card_001', 'card_006', 'card_009'];
   }
 
-  // Слушаем ответ от бота
+  // Обработчик ответа от бота
   tg.onEvent('webAppDataReceived', (data) => {
+    alert("Получен ответ от бота!\n\nДанные: " + data);
+
     try {
       const payload = JSON.parse(data);
-      if (payload && payload.inventory && Array.isArray(payload.inventory)) {
+      if (payload.inventory) {
         inventory = payload.inventory;
-        console.log(`✅ Инвентарь успешно загружен! Всего карт: ${inventory.length}`);
-        console.log("Содержимое:", inventory);
+        alert("✅ Инвентарь загружен!\nКоличество карт: " + inventory.length);
         
-        // Обновляем интерфейс после загрузки
-        updateUI();
+        // Показываем первые 3 карты для проверки
+        if (inventory.length > 0) {
+          alert("Первые карты: " + inventory.slice(0, 3).join(", "));
+        }
       } else {
-        console.warn("Ответ от бота пришёл, но inventory не найден");
+        alert("Ответ пришёл, но инвентаря в нём нет");
       }
     } catch (e) {
-      console.error("❌ Ошибка при обработке ответа от бота:", e);
+      alert("Ошибка при обработке ответа от бота:\n" + e);
     }
   });
 
