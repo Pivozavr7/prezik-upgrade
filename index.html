@@ -99,13 +99,11 @@ body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; 
 
 <script>
 // ==================== ИНИЦИАЛИЗАЦИЯ ====================
-const tg = window.Telegram?.WebApp;
-
-if (tg) {
-  tg.ready();
-  tg.expand();
-  tg.setHeaderColor('#0d0f14');
-  tg.setBackgroundColor('#0d0f14');
+if (window.Telegram && window.Telegram.WebApp) {
+  window.Telegram.WebApp.sendData(JSON.stringify({
+    action: "upgrade_result",
+    inventory: inventory
+  }));
 }
 
 const userId = tg?.initDataUnsafe?.user?.id || null;
