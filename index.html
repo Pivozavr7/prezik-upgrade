@@ -57,7 +57,7 @@ body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; 
 .mc-emoji { font-size:22px; flex-shrink:0; }
 .mc-info { flex:1; min-width:0; }
 .mc-name { font-size:12px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.mc-rarity{ font-size:10px; color:var(--muted); margin-top:2px; }
+.mc-rarity { font-size:10px; color:var(--muted); margin-top:2px; }
 .mc-count { font-size:11px; color:var(--muted); flex-shrink:0; }
 .no-cards { text-align:center; color:var(--muted); font-size:12px; padding:30px 0; letter-spacing:1px; }
 .rc-common{color:#9a9a9a} .rc-rare{color:#4da6ff} .rc-veryrare{color:#b04dff}
@@ -223,8 +223,8 @@ function spinArrow(win, chance, cb) {
   const mid = Math.PI/2;
   const wS = mid - half;
   const wE = mid + half;
-  let finalAngle = win 
-    ? wS + 0.06 + Math.random()*(half*2 - 0.12) 
+  let finalAngle = win
+    ? wS + 0.06 + Math.random()*(half*2 - 0.12)
     : wE + 0.06 + Math.random()*(Math.PI*2 - half*2 - 0.12);
 
   finalAngle = ((finalAngle % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
@@ -270,8 +270,9 @@ function renderSlot(el, key, type) {
 
 function openModal(type) {
   if (spinning) return;
-  document.getElementById('modal-title').textContent = type==='from'?'Твоя карточка':'Цель апгрейда';
-  const list = document.getElementById('modal-list'); list.innerHTML = '';
+  document.getElementById('modal-title').textContent = type==='from' ? 'Твоя карточка' : 'Цель апгрейда';
+  const list = document.getElementById('modal-list');
+  list.innerHTML = '';
 
   if (type==='from') {
     const counts = {};
@@ -285,7 +286,8 @@ function openModal(type) {
     });
   } else {
     const fw = selectedFrom ? (RARITY_WEIGHT[allCards[selectedFrom]?.rarity]||999) : 999;
-    const tgts = Object.entries(allCards).filter(([,v]) => (RARITY_WEIGHT[v.rarity]||0) < fw)
+    const tgts = Object.entries(allCards)
+      .filter(([,v]) => (RARITY_WEIGHT[v.rarity]||0) < fw)
       .sort((a,b) => RARITY_ORDER.indexOf(a[1].rarity) - RARITY_ORDER.indexOf(b[1].rarity));
     if (!tgts.length) list.innerHTML = '<div class="no-cards">НЕТ КАРТОЧЕК РЕДЧЕ</div>';
     else tgts.forEach(([k,v]) => {
@@ -298,53 +300,63 @@ function openModal(type) {
 }
 
 function buildMC(card, key, count) {
-  const el = document.createElement('div'); el.className = 'mc';
+  const el = document.createElement('div');
+  el.className = 'mc';
   el.innerHTML = `<div class="mc-emoji">${getEmoji(card)}</div><div class="mc-info"><div class="mc-name">${card.name}</div><div class="mc-rarity ${RARITY_CLASS[card.rarity]||''}">${card.rarity}</div></div>${count!==null ? `<div class="mc-count">x${count}</div>` : ''}`;
   return el;
 }
 
-function pickFrom(k){ selectedFrom = k; renderSlot(document.getElementById('slot-from'),k,'from'); if(selectedTo && !getChance()){selectedTo=null; renderSlot(document.getElementById('slot-to'),null,'to');} closeModal(); updateUI(); }
-function pickTo(k){ selectedTo = k; renderSlot(document.getElementById('slot-to'),k,'to'); closeModal(); updateUI(); }
-function closeModal(){ document.getElementById('modal-bg').classList.remove('open'); }
-function closeBg(e){ if(e.target === document.getElementById('modal-bg')) closeModal(); }
+function pickFrom(k) {
+  selectedFrom = k;
+  renderSlot(document.getElementById('slot-from'), k, 'from');
+  if (selectedTo && !getChance()) { selectedTo = null; renderSlot(document.getElementById('slot-to'), null, 'to'); }
+  closeModal();
+  updateUI();
+}
+function pickTo(k) { selectedTo = k; renderSlot(document.getElementById('slot-to'), k, 'to'); closeModal(); updateUI(); }
+function closeModal() { document.getElementById('modal-bg').classList.remove('open'); }
+function closeBg(e) { if (e.target === document.getElementById('modal-bg')) closeModal(); }
 
-async function loadCards(){
-  try{ const r = await fetch('cards.json'); allCards = await r.json(); }
-  catch(e){ console.warn("cards.json не найден"); }
+async function loadCards() {
+  try {
+    const r = await fetch('cards.json');
+    allCards = await r.json();
+  } catch(e) {
+    console.warn('cards.json не найден');
+  }
 }
 
-function loadInventory(){
-  if (!userId) return;
-  tg.sendData(JSON.stringify({ action: "get_inventory", initData: tg.initData }));
-}
-
-function saveInventory(){
-  if (!userId) return;
-  tg.sendData(JSON.stringify({ action: "update_inventory", initData: tg.initData, inventory: inventory }));
+function saveInventory() {
+  if (userId) {
+    try { localStorage.setItem('inv_' + userId, JSON.stringify(inventory)); } catch(e) {}
+  }
 }
 
 function doUpgrade() {
   if (spinning || !selectedFrom || !selectedTo) return;
-  const chance = getChance(); if (!chance) return;
+  const chance = getChance();
+  if (!chance) return;
   spinning = true;
   document.getElementById('btn-upgrade').disabled = true;
   const win = Math.random()*100 < chance;
 
   spinArrow(win, chance, () => {
     const fl = document.getElementById('result-flash');
-    document.getElementById('rf-bg').className = 'rf-bg '+(win?'win':'lose');
+    document.getElementById('rf-bg').className = 'rf-bg ' + (win ? 'win' : 'lose');
     const rt = document.getElementById('rf-text');
-    rt.className = 'rf-text '+(win?'win':'lose');
+    rt.className = 'rf-text ' + (win ? 'win' : 'lose');
     rt.textContent = win ? 'АПГРЕЙД!' : 'ПРОВАЛ';
-    document.getElementById('rf-sub').textContent = win ? 'Получена: '+(allCards[selectedTo]?.name||'') : 'Карточка потеряна навсегда';
+    document.getElementById('rf-sub').textContent = win
+      ? 'Получена: ' + (allCards[selectedTo]?.name || '')
+      : 'Карточка потеряна навсегда';
 
     if (win) {
       const i = inventory.indexOf(selectedFrom);
-      if(i!==-1) inventory.splice(i,1);
+      if (i !== -1) inventory.splice(i, 1);
       inventory.push(selectedTo);
     } else {
       const i = inventory.indexOf(selectedFrom);
-      if(i!==-1) inventory.splice(i,1);
+      if (i !== -1) inventory.splice(i, 1);
     }
 
     saveInventory();
@@ -353,21 +365,16 @@ function doUpgrade() {
     setTimeout(() => {
       fl.classList.remove('show');
       selectedFrom = selectedTo = null;
-      renderSlot(document.getElementById('slot-from'),null,'from');
-      renderSlot(document.getElementById('slot-to'),null,'to');
+      renderSlot(document.getElementById('slot-from'), null, 'from');
+      renderSlot(document.getElementById('slot-to'), null, 'to');
       spinning = false;
       arrowAngle = Math.PI / 2;
       updateUI();
     }, 2800);
   });
 }
-<script>
-const tg = window.Telegram?.WebApp || {};
-if (tg) tg.expand();
 
-const userId = tg.initDataUnsafe?.user?.id || null;
-
-// ==================== ПРОСТОЙ ЗАПУСК ====================
+// ==================== ЗАПУСК ====================
 (async () => {
   await loadCards();
 
@@ -378,21 +385,8 @@ const userId = tg.initDataUnsafe?.user?.id || null;
     } catch(e) {}
   }
 
-  if (inventory.length === 0) {
-    inventory = ['card_001','card_006','card_009','card_018','card_021'];
-  }
-
-  alert(`✅ Работает!\nКарт в инвентаре: ${inventory.length}`);
-
-  // Автосохранение
-  saveInventory = function() {
-    if (userId) localStorage.setItem('inv_' + userId, JSON.stringify(inventory));
-  };
-
   drawAll(null, arrowAngle);
 })();
-</script>
-
 </script>
 </body>
 </html>
