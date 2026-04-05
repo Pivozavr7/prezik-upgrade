@@ -362,36 +362,32 @@ function doUpgrade() {
   });
 }
 
-// ==================== ЗАПУСК (ДИАГНОСТИКА) ====================
+<script>
+// ... (весь твой код выше до этого момента остаётся) ...
+
+// ==================== РАБОЧИЙ ЗАПУСК ЧЕРЕЗ LOCALSTORAGE ====================
 (async () => {
   await loadCards();
-  
-  alert("WebApp открыт\nUser ID: " + (userId || "null"));
 
   if (userId) {
-    setTimeout(() => {
-      alert("Отправляем запрос инвентаря...");
-      loadInventory();
-    }, 800);
-  } else {
-    inventory = ['card_001','card_006','card_009'];
-    alert("Тестовый режим — инвентарь загружен");
+    try {
+      const saved = localStorage.getItem('inv_' + userId);
+      if (saved) inventory = JSON.parse(saved);
+    } catch(e) {}
   }
 
-  tg.onEvent('webAppDataReceived', (data) => {
-    alert("✅ Ответ от бота пришёл!\nДанные: " + data.substring(0, 150));
-    
-    try {
-      const payload = JSON.parse(data);
-      if (payload.inventory) {
-        inventory = payload.inventory;
-        alert(`Инвентарь загружен! Карт: ${inventory.length}`);
-        updateUI();
-      }
-    } catch(e) {
-      alert("Ошибка парсинга: " + e);
-    }
-  });
+  if (inventory.length === 0) {
+    inventory = ['card_001', 'card_006', 'card_009', 'card_018', 'card_021'];
+  }
+
+  alert(`✅ WebApp запущен!\n\nКарт в инвентаре: ${inventory.length}`);
+
+  // Автосохранение
+  const originalSave = saveInventory;
+  saveInventory = function() {
+    if (userId) localStorage.setItem('inv_' + userId, JSON.stringify(inventory));
+    if (originalSave) originalSave();
+  };
 
   drawAll(null, arrowAngle);
 })();
