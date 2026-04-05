@@ -80,11 +80,13 @@ body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; 
   </div>
   <button class="btn-upgrade" id="btn-upgrade" disabled onclick="doUpgrade()">ПРОКАЧАТЬ</button>
 </div>
+
 <div class="result-flash" id="result-flash">
   <div class="rf-bg" id="rf-bg"></div>
   <div class="rf-text" id="rf-text"></div>
   <div class="rf-sub" id="rf-sub"></div>
 </div>
+
 <div class="modal-bg" id="modal-bg" onclick="closeBg(event)">
   <div class="modal">
     <div class="modal-header">
@@ -124,7 +126,7 @@ const CX = 160, CY = 165, R = 110, RW = 22;
 let arrowAngle = Math.PI / 2;
 
 // ==================== ОСНОВНЫЕ ФУНКЦИИ ====================
-function drawAll(chance, arrow) {
+function drawAll(chance, arrow) { /* ... тот же код, что был ... */ 
   ctx.clearRect(0, 0, 320, 380);
   const steps = 180;
   const arrowN = ((arrow % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
@@ -164,7 +166,6 @@ function drawAll(chance, arrow) {
   ctx.fillStyle = '#0d0f14';
   ctx.fill();
 
-  // стрелка
   const rTip = R + RW/2 + 1;
   const rOuter = R + RW/2 + 14;
   const hw = 9;
@@ -220,7 +221,9 @@ function spinArrow(win, chance, cb) {
   const mid = Math.PI/2;
   const wS = mid - half;
   const wE = mid + half;
-  let finalAngle = win ? wS + 0.06 + Math.random()*(half*2 - 0.12) : wE + 0.06 + Math.random()*(Math.PI*2 - half*2 - 0.12);
+  let finalAngle = win 
+    ? wS + 0.06 + Math.random()*(half*2 - 0.12) 
+    : wE + 0.06 + Math.random()*(Math.PI*2 - half*2 - 0.12);
   finalAngle = ((finalAngle % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
 
   const sa = ((arrowAngle % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
@@ -355,7 +358,7 @@ async function loadCards() {
   }
 }
 
-// ==================== doUpgrade ====================
+// ==================== doUpgrade (с автозакрытием) ====================
 function doUpgrade() {
   if (spinning || !selectedFrom || !selectedTo) return;
   const chance = getChance();
@@ -385,84 +388,19 @@ function doUpgrade() {
       if (i !== -1) inventory.splice(i, 1);
     }
 
-    // === ВРЕМЕННАЯ ОТЛАДКА ===
-    const debugDiv = document.createElement('div');
-    debugDiv.style.position = 'fixed';
-    debugDiv.style.bottom = '10px';
-    debugDiv.style.left = '10px';
-    debugDiv.style.background = 'rgba(0,0,0,0.9)';
-    debugDiv.style.color = '#0f0';
-    debugDiv.style.padding = '10px';
-    debugDiv.style.fontSize = '12px';
-    debugDiv.style.zIndex = '9999';
-    debugDiv.style.maxWidth = '300px';
-    debugDiv.innerHTML = `
-      Отправка данных...<br>
-      Карточек в инвентаре: ${inventory.length}<br>
-      userId: ${userId || 'нет'}<br>
-      Telegram.WebApp: ${!!window.Telegram?.WebApp ? 'ДА' : 'НЕТ'}
-    `;
-    document.body.appendChild(debugDiv);
-
-    // Пытаемся отправить
+    // Отправка + автозакрытие
     if (window.Telegram?.WebApp) {
       const payload = {
         action: "upgrade_result",
         inventory: inventory,
         user_id: userId
       };
-      
-      try {
-        window.Telegram.WebApp.sendData(JSON.stringify(payload));
-        debugDiv.innerHTML += '<br><span style="color:#0f0">sendData вызван</span>';
-        
-        // Принудительно закрываем через 1 секунду
-        setTimeout(() => {
-          window.Telegram.WebApp.close();
-        }, 1000);
-        
-      } catch (e) {
-        debugDiv.innerHTML += `<br><span style="color:#f00">Ошибка sendData: ${e.message}</span>`;
-      }
-    } else {
-      debugDiv.innerHTML += '<br><span style="color:#f00">Telegram.WebApp НЕ найден!</span>';
-    }
+      window.Telegram.WebApp.sendData(JSON.stringify(payload));
 
-    fl.classList.add('show');
-    setTimeout(() => {
-      fl.classList.remove('show');
-      spinning = false;
-    }, 2800);
-  });
-}
-    // ==================== ОТПРАВКА + ЗАКРЫТИЕ ====================
-    console.log("=== НАЧИНАЕМ ОТПРАВКУ ДАННЫХ ===");
-    console.log("Telegram.WebApp:", window.Telegram?.WebApp ? "ОБНАРУЖЕН" : "НЕ НАЙДЕН");
-
-    if (window.Telegram?.WebApp) {
-      const payload = {
-        action: "upgrade_result",
-        inventory: inventory,
-        user_id: userId
-      };
-      const jsonData = JSON.stringify(payload);
-
-      console.log("Отправляемые данные:", jsonData);
-
-      try {
-        window.Telegram.WebApp.sendData(jsonData);
-        console.log("✅ sendData() вызван успешно");
-      } catch (e) {
-        console.error("❌ Ошибка sendData:", e);
-      }
-
-      // Принудительно закрываем WebApp через 800мс (на случай, если sendData не сработал)
+      // Принудительное закрытие через 800мс
       setTimeout(() => {
-        console.log("🔒 Принудительно закрываем WebApp");
         window.Telegram.WebApp.close();
       }, 800);
-    } else {
-      console.error("❌ Telegram.WebApp не найден!");
     }
 
     fl.classList.add('show');
@@ -487,7 +425,7 @@ function doUpgrade() {
     }
   }
 
-  updateUI();   // ← это важно!
+  updateUI();
 })();
 </script>
 </body>
