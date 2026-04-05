@@ -388,19 +388,26 @@ function doUpgrade() {
       if (i !== -1) inventory.splice(i, 1);
     }
 
-    // Отправка + автозакрытие
+    // === ФИНАЛЬНАЯ ОТПРАВКА ===
     if (window.Telegram?.WebApp) {
       const payload = {
         action: "upgrade_result",
         inventory: inventory,
         user_id: userId
       };
-      window.Telegram.WebApp.sendData(JSON.stringify(payload));
 
-      // Принудительное закрытие через 800мс
+      try {
+        window.Telegram.WebApp.sendData(JSON.stringify(payload));
+      } catch (e) {
+        console.error("sendData error:", e);
+      }
+
+      // Принудительное закрытие (самое надёжное)
       setTimeout(() => {
-        window.Telegram.WebApp.close();
-      }, 800);
+        if (window.Telegram?.WebApp) {
+          window.Telegram.WebApp.close();
+        }
+      }, 900);
     }
 
     fl.classList.add('show');
