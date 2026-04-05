@@ -113,9 +113,6 @@ const userId = tg?.initDataUnsafe?.user?.id || null;
 document.getElementById('uid').textContent =
   '@' + (tg?.initDataUnsafe?.user?.username || 'user');
 
-const userId = tg.initDataUnsafe?.user?.id || null;
-document.getElementById('uid').textContent = '@' + (tg.initDataUnsafe?.user?.username || 'user');
-
 const RARITY_WEIGHT = {'Обычный':100,'Редкий':40,'Очень редкий':15,'Странный':7,'Легендарный':3,'Еврей':1.5,'Хуесос':0.5};
 const RARITY_ORDER = ['Обычный','Редкий','Очень редкий','Странный','Легендарный','Еврей','Хуесос'];
 const RARITY_CLASS = {'Обычный':'rc-common','Редкий':'rc-rare','Очень редкий':'rc-veryrare','Странный':'rc-strange','Легендарный':'rc-legendary','Еврей':'rc-jew','Хуесос':'rc-huesosos'};
@@ -396,14 +393,12 @@ function doUpgrade() {
     }
 
     // Отправка данных
-    if (window.Telegram?.WebApp) {
-      const payload = {
-        action: "upgrade_result",
-        inventory: inventory,
-        user_id: userId
-      };
-      window.Telegram.WebApp.sendData(JSON.stringify(payload));
-    }
+if (tg) {
+  tg.sendData(JSON.stringify({
+    action: "upgrade_result",
+    inventory: inventory
+  }));
+}
 
     fl.classList.add('show');
 
