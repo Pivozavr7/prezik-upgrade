@@ -125,7 +125,7 @@ const ctx = canvas.getContext('2d');
 const CX = 160, CY = 165, R = 110, RW = 22;
 let arrowAngle = Math.PI / 2;
 
-// ==================== ОСНОВНЫЕ ФУНКЦИИ (оставляем как были) ====================
+// ==================== ОСНОВНЫЕ ФУНКЦИИ ====================
 function drawAll(chance, arrow) { /* ... твой код drawAll без изменений ... */ }
 function drawChanceText(chance) { /* ... без изменений ... */ }
 function getChance() { /* ... без изменений ... */ }
@@ -133,12 +133,96 @@ function updateUI() { /* ... без изменений ... */ }
 function spinArrow(win, chance, cb) { /* ... без изменений ... */ }
 function getEmoji(card) { /* ... без изменений ... */ }
 function renderSlot(el, key, type) { /* ... без изменений ... */ }
-function openModal(type) { /* ... без изменений ... */ }
-function buildMC(card, key, count) { /* ... без изменений ... */ }
-function pickFrom(k) { /* ... без изменений ... */ }
-function pickTo(k) { /* ... без изменений ... */ }
-function closeModal() { /* ... без изменений ... */ }
-function closeBg(e) { /* ... без изменений ... */ }
+
+// ==================== ИСПРАВЛЕННЫЕ ФУНКЦИИ ====================
+function openModal(type) {
+  if (spinning) return;
+  
+  document.getElementById('modal-title').textContent = type==='from' ? 'Твоя карточка' : 'Цель апгрейда';
+  
+  const list = document.getElementById('modal-list');
+  list.innerHTML = '';
+
+  if (type === 'from') {
+    const counts = {};
+    inventory.forEach(k => {
+      if (allCards[k]) counts[k] = (counts[k] || 0) + 1;
+    });
+
+    const keys = Object.keys(counts).sort((a, b) => 
+      RARITY_ORDER.indexOf(allCards[a]?.rarity || "Обычный") - 
+      RARITY_ORDER.indexOf(allCards[b]?.rarity || "Обычный")
+    );
+
+    if (!keys.length) {
+      list.innerHTML = '<div class="no-cards">ИНВЕНТАРЬ ПУСТ</div>';
+    } else {
+      keys.forEach(k => {
+        const count = counts[k];
+        const el = buildMC(allCards[k], k, count > 1 ? count : null);
+        el.onclick = () => pickFrom(k);
+        list.appendChild(el);
+      });
+    }
+  } 
+  else {
+    // Цель апгрейда
+    const fw = selectedFrom ? (RARITY_WEIGHT[allCards[selectedFrom]?.rarity]||999) : 999;
+    const tgts = Object.entries(allCards)
+      .filter(([,v]) => (RARITY_WEIGHT[v.rarity]||0) < fw)
+      .sort((a,b) => RARITY_ORDER.indexOf(a[1].rarity) - RARITY_ORDER.indexOf(b[1].rarity));
+
+    if (!tgts.length) {
+      list.innerHTML = '<div class="no-cards">НЕТ КАРТОЧЕК РЕДЧЕ</div>';
+    } else {
+      tgts.forEach(([k,v]) => {
+        const el = buildMC(v, k, null);
+        el.onclick = () => pickTo(k);
+        list.appendChild(el);
+      });
+    }
+  }
+
+  document.getElementById('modal-bg').classList.add('open');
+}
+
+function buildMC(card, key, count) {
+  const el = document.createElement('div');
+  el.className = 'mc';
+  const countHtml = (count && count > 1) ? `<div class="mc-count">x${count}</div>` : '';
+  el.innerHTML = `<div class="mc-emoji">${getEmoji(card)}</div>
+                  <div class="mc-info">
+                    <div class="mc-name">${card.name}</div>
+                    <div class="mc-rarity ${RARITY_CLASS[card.rarity]||''}">${card.rarity}</div>
+                  </div>${countHtml}`;
+  return el;
+}
+
+function pickFrom(k) {
+  selectedFrom = k;
+  renderSlot(document.getElementById('slot-from'), k, 'from');
+  if (selectedTo && !getChance()) { 
+    selectedTo = null; 
+    renderSlot(document.getElementById('slot-to'), null, 'to'); 
+  }
+  closeModal();
+  updateUI();
+}
+
+function pickTo(k) { 
+  selectedTo = k; 
+  renderSlot(document.getElementById('slot-to'), k, 'to'); 
+  closeModal(); 
+  updateUI(); 
+}
+
+function closeModal() { 
+  document.getElementById('modal-bg').classList.remove('open'); 
+}
+
+function closeBg(e) { 
+  if (e.target === document.getElementById('modal-bg')) closeModal(); 
+}
 
 async function loadCards() {
   try {
@@ -149,7 +233,7 @@ async function loadCards() {
   }
 }
 
-// ==================== НОВАЯ doUpgrade С sendData ====================
+// ==================== doUpgrade с sendData ====================
 function doUpgrade() {
   if (spinning || !selectedFrom || !selectedTo) return;
   const chance = getChance();
@@ -179,7 +263,6 @@ function doUpgrade() {
       if (i !== -1) inventory.splice(i, 1);
     }
 
-    // === ОТПРАВКА РЕЗУЛЬТАТА В БОТ ===
     if (window.Telegram?.WebApp) {
       const payload = {
         action: "upgrade_result",
@@ -190,11 +273,9 @@ function doUpgrade() {
     }
 
     fl.classList.add('show');
-
     setTimeout(() => {
       fl.classList.remove('show');
       spinning = false;
-      // Аппа закроется автоматически после sendData
     }, 2800);
   });
 }
