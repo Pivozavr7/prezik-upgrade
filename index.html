@@ -21,13 +21,13 @@ body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; 
 .cards-row { display:grid; grid-template-columns:1fr 32px 1fr; gap:8px; align-items:center; width:100%; max-width:360px; }
 .card-slot { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:12px 10px; min-height:96px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer; transition:border-color 0.2s; }
 .card-slot.is-from.has-card { border-color:rgba(200,255,0,0.4); }
-.card-slot.is-to.has-card   { border-color:rgba(76,255,114,0.4); }
+.card-slot.is-to.has-card { border-color:rgba(76,255,114,0.4); }
 .card-slot:active { transform:scale(0.97); }
-.slot-emoji  { font-size:24px; line-height:1; }
-.slot-name   { font-size:10px; font-weight:500; text-align:center; line-height:1.3; }
+.slot-emoji { font-size:24px; line-height:1; }
+.slot-name { font-size:10px; font-weight:500; text-align:center; line-height:1.3; }
 .slot-rarity { font-size:9px; color:var(--muted); letter-spacing:0.5px; }
-.slot-empty  { font-size:10px; color:var(--muted); letter-spacing:1px; text-align:center; line-height:1.7; }
-.arrow-mid   { text-align:center; color:var(--muted); font-size:18px; }
+.slot-empty { font-size:10px; color:var(--muted); letter-spacing:1px; text-align:center; line-height:1.7; }
+.arrow-mid { text-align:center; color:var(--muted); font-size:18px; }
 .wheel-wrap { position:relative; width:320px; height:380px; flex-shrink:0; }
 #wheelCanvas { display:block; }
 .btn-upgrade { width:100%; max-width:300px; padding:15px; background:var(--accent); color:#000; font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:4px; border:none; border-radius:10px; cursor:pointer; transition:opacity 0.2s, transform 0.1s; }
@@ -36,10 +36,10 @@ body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; 
 .result-flash { display:none; position:fixed; inset:0; z-index:200; align-items:center; justify-content:center; flex-direction:column; gap:10px; pointer-events:none; }
 .result-flash.show { display:flex; }
 .rf-bg { position:absolute; inset:0; opacity:0.18; }
-.rf-bg.win  { background:var(--win); }
+.rf-bg.win { background:var(--win); }
 .rf-bg.lose { background:var(--lose); }
 .rf-text { font-family:'Bebas Neue',sans-serif; font-size:72px; letter-spacing:8px; position:relative; z-index:1; animation:fi 0.3s ease; }
-.rf-text.win  { color:var(--win);  text-shadow:0 0 40px rgba(76,255,114,0.9); }
+.rf-text.win { color:var(--win); text-shadow:0 0 40px rgba(76,255,114,0.9); }
 .rf-text.lose { color:var(--lose); text-shadow:0 0 40px rgba(255,68,68,0.9); }
 .rf-sub { font-size:13px; color:rgba(255,255,255,0.65); letter-spacing:1px; position:relative; z-index:1; }
 @keyframes fi { from{transform:scale(0.6);opacity:0;} to{transform:scale(1);opacity:1;} }
@@ -55,8 +55,8 @@ body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; 
 .mc { display:flex; align-items:center; gap:12px; padding:10px 12px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; cursor:pointer; }
 .mc:active { border-color:var(--accent); opacity:0.8; }
 .mc-emoji { font-size:22px; flex-shrink:0; }
-.mc-info  { flex:1; min-width:0; }
-.mc-name  { font-size:12px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mc-info { flex:1; min-width:0; }
+.mc-name { font-size:12px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .mc-rarity{ font-size:10px; color:var(--muted); margin-top:2px; }
 .mc-count { font-size:11px; color:var(--muted); flex-shrink:0; }
 .no-cards { text-align:center; color:var(--muted); font-size:12px; padding:30px 0; letter-spacing:1px; }
@@ -69,6 +69,7 @@ body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; 
   <div class="logo">PREZIK UP</div>
   <div class="header-user" id="uid">@USER</div>
 </div>
+
 <div class="page">
   <div class="cards-row">
     <div class="card-slot is-from" id="slot-from" onclick="openModal('from')"><div class="slot-empty">ТВОЯ<br>КАРТОЧКА</div></div>
@@ -80,11 +81,13 @@ body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; 
   </div>
   <button class="btn-upgrade" id="btn-upgrade" disabled onclick="doUpgrade()">ПРОКАЧАТЬ</button>
 </div>
+
 <div class="result-flash" id="result-flash">
   <div class="rf-bg" id="rf-bg"></div>
   <div class="rf-text" id="rf-text"></div>
   <div class="rf-sub" id="rf-sub"></div>
 </div>
+
 <div class="modal-bg" id="modal-bg" onclick="closeBg(event)">
   <div class="modal">
     <div class="modal-header">
@@ -94,68 +97,74 @@ body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; 
     <div class="modal-list" id="modal-list"></div>
   </div>
 </div>
+
 <script>
-const tg = window.Telegram?.WebApp;
-if (tg) { tg.expand(); tg.setHeaderColor?.('#0d0f14'); tg.setBackgroundColor?.('#0d0f14'); }
-const userId = tg?.initDataUnsafe?.user?.id || null;
-document.getElementById('uid').textContent = '@' + (tg?.initDataUnsafe?.user?.username || 'user');
+const tg = window.Telegram?.WebApp || {};
+if (tg) {
+  tg.expand();
+  tg.setHeaderColor?.('#0d0f14');
+  tg.setBackgroundColor?.('#0d0f14');
+}
+
+const userId = tg.initDataUnsafe?.user?.id || null;
+document.getElementById('uid').textContent = '@' + (tg.initDataUnsafe?.user?.username || 'user');
 
 const RARITY_WEIGHT = {'Обычный':100,'Редкий':40,'Очень редкий':15,'Странный':7,'Легендарный':3,'Еврей':1.5,'Хуесос':0.5};
-const RARITY_ORDER  = ['Обычный','Редкий','Очень редкий','Странный','Легендарный','Еврей','Хуесос'];
-const RARITY_CLASS  = {'Обычный':'rc-common','Редкий':'rc-rare','Очень редкий':'rc-veryrare','Странный':'rc-strange','Легендарный':'rc-legendary','Еврей':'rc-jew','Хуесос':'rc-huesosos'};
-const RARITY_EMOJI  = {'Обычный':'⬜','Редкий':'🟦','Очень редкий':'🟣','Странный':'☮️','Легендарный':'🌟','Еврей':'✡️','Хуесос':'❗'};
+const RARITY_ORDER = ['Обычный','Редкий','Очень редкий','Странный','Легендарный','Еврей','Хуесос'];
+const RARITY_CLASS = {'Обычный':'rc-common','Редкий':'rc-rare','Очень редкий':'rc-veryrare','Странный':'rc-strange','Легендарный':'rc-legendary','Еврей':'rc-jew','Хуесос':'rc-huesosos'};
+const RARITY_EMOJI = {'Обычный':'⬜','Редкий':'🟦','Очень редкий':'🟣','Странный':'☮️','Легендарный':'🌟','Еврей':'✡️','Хуесос':'❗'};
 
-let allCards={}, inventory=[];
-let selectedFrom=null, selectedTo=null, spinning=false;
+let allCards = {};
+let inventory = [];
+let selectedFrom = null;
+let selectedTo = null;
+let spinning = false;
 
 const canvas = document.getElementById('wheelCanvas');
 const ctx = canvas.getContext('2d');
-
 const CX = 160, CY = 165;
 const R = 110, RW = 22;
-
 let arrowAngle = Math.PI / 2;
 let currentChance = null;
 
+// ==================== РИСОВАНИЕ КОЛЕСА (твоя логика) ====================
 function drawAll(chance, arrow) {
   ctx.clearRect(0, 0, 320, 380);
+  const steps = 180;
+  const arrowN = ((arrow % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+  const half = chance ? (chance / 100) * Math.PI : 0;
+  const mid = Math.PI / 2;
+  const winS = mid - half;
+  const winE = mid + half;
 
-  // full ring drawn as segments — arrow is the "light source"
-  {
-    const steps = 180;
-    const arrowN = ((arrow % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
-    const half = chance ? (chance / 100) * Math.PI : 0;
-    const mid  = Math.PI / 2;
-    const winS = mid - half;
-    const winE = mid + half;
+  function angDist(a, b) {
+    return Math.abs(((a - b + Math.PI*3) % (Math.PI*2)) - Math.PI);
+  }
 
-    function angDist(a, b) {
-      return Math.abs(((a - b + Math.PI*3) % (Math.PI*2)) - Math.PI);
+  for (let i = 0; i < steps; i++) {
+    const a1 = (i / steps) * Math.PI * 2;
+    const a2 = ((i + 1.05) / steps) * Math.PI * 2;
+    const aMid = (i + 0.5) / steps * Math.PI * 2;
+    const inWin = chance && aMid >= winS && aMid <= winE;
+    const glowSpread = Math.max(0.5, half * 1.1);
+    const dist = angDist(aMid, arrowN);
+    const gf = Math.pow(Math.max(0, 1 - dist / glowSpread), 1.8);
+
+    let r, g, b;
+    if (inWin) {
+      r = 13 + (76 - 13) * gf;
+      g = 61 + (255 - 61) * gf;
+      b = 28 + (114 - 28) * gf;
+    } else {
+      r = 22; g = 10; b = 10;
     }
 
-    for (let i = 0; i < steps; i++) {
-      const a1   = (i / steps) * Math.PI * 2;
-      const a2   = ((i + 1.05) / steps) * Math.PI * 2;
-      const aMid = (i + 0.5) / steps * Math.PI * 2;
-      const inWin = chance && aMid >= winS && aMid <= winE;
-      const glowSpread = Math.max(0.5, half * 1.1);
-      const dist = angDist(aMid, arrowN);
-      const gf   = Math.pow(Math.max(0, 1 - dist / glowSpread), 1.8);
-      let r, g, b;
-      if (inWin) {
-        r = 13  + (76  - 13)  * gf;
-        g = 61  + (255 - 61)  * gf;
-        b = 28  + (114 - 28)  * gf;
-      } else {
-        r = 22; g = 10; b = 10;
-      }
-      ctx.beginPath();
-      ctx.arc(CX, CY, R, a1, a2);
-      ctx.strokeStyle = `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
-      ctx.lineWidth = RW;
-      ctx.lineCap = 'butt';
-      ctx.stroke();
-    }
+    ctx.beginPath();
+    ctx.arc(CX, CY, R, a1, a2);
+    ctx.strokeStyle = `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+    ctx.lineWidth = RW;
+    ctx.lineCap = 'butt';
+    ctx.stroke();
   }
 
   // inner fill
@@ -165,25 +174,24 @@ function drawAll(chance, arrow) {
   ctx.fill();
 
   // arrow
-  {
-    const rTip   = R + RW/2 + 1;
-    const rOuter = R + RW/2 + 14;
-    const hw     = 9;
-    const perp   = arrow + Math.PI/2;
-    const tipX = CX + Math.cos(arrow)*rTip;
-    const tipY = CY + Math.sin(arrow)*rTip;
-    const b1x  = CX + Math.cos(arrow)*rOuter + Math.cos(perp)*hw;
-    const b1y  = CY + Math.sin(arrow)*rOuter + Math.sin(perp)*hw;
-    const b2x  = CX + Math.cos(arrow)*rOuter - Math.cos(perp)*hw;
-    const b2y  = CY + Math.sin(arrow)*rOuter - Math.sin(perp)*hw;
-    ctx.beginPath();
-    ctx.moveTo(tipX, tipY);
-    ctx.lineTo(b1x, b1y);
-    ctx.lineTo(b2x, b2y);
-    ctx.closePath();
-    ctx.fillStyle = '#fff';
-    ctx.fill();
-  }
+  const rTip = R + RW/2 + 1;
+  const rOuter = R + RW/2 + 14;
+  const hw = 9;
+  const perp = arrow + Math.PI/2;
+  const tipX = CX + Math.cos(arrow)*rTip;
+  const tipY = CY + Math.sin(arrow)*rTip;
+  const b1x = CX + Math.cos(arrow)*rOuter + Math.cos(perp)*hw;
+  const b1y = CY + Math.sin(arrow)*rOuter + Math.sin(perp)*hw;
+  const b2x = CX + Math.cos(arrow)*rOuter - Math.cos(perp)*hw;
+  const b2y = CY + Math.sin(arrow)*rOuter - Math.sin(perp)*hw;
+
+  ctx.beginPath();
+  ctx.moveTo(tipX, tipY);
+  ctx.lineTo(b1x, b1y);
+  ctx.lineTo(b2x, b2y);
+  ctx.closePath();
+  ctx.fillStyle = '#fff';
+  ctx.fill();
 
   drawChanceText(chance);
 }
@@ -204,11 +212,12 @@ function drawChanceText(chance) {
 
 function getChance() {
   if (!selectedFrom || !selectedTo) return null;
-  const f=allCards[selectedFrom], t=allCards[selectedTo];
+  const f = allCards[selectedFrom], t = allCards[selectedTo];
   if (!f || !t) return null;
-  const wf=RARITY_WEIGHT[f.rarity]||1, wt=RARITY_WEIGHT[t.rarity]||1;
+  const wf = RARITY_WEIGHT[f.rarity] || 1;
+  const wt = RARITY_WEIGHT[t.rarity] || 1;
   if (wt >= wf) return null;
-  return Math.min(95, Math.max(1, Math.round((wt/wf)*100)));
+  return Math.min(95, Math.max(1, Math.round((wt / wf) * 100)));
 }
 
 function updateUI() {
@@ -217,11 +226,12 @@ function updateUI() {
   drawAll(currentChance, arrowAngle);
 }
 
+// ==================== СПИН И АПГРЕЙД ====================
 function spinArrow(win, chance, cb) {
   const half = (chance/100) * Math.PI;
-  const mid  = Math.PI/2;
-  const wS   = mid - half;
-  const wE   = mid + half;
+  const mid = Math.PI/2;
+  const wS = mid - half;
+  const wE = mid + half;
   let finalAngle;
   if (win) {
     const margin = 0.06;
@@ -231,103 +241,219 @@ function spinArrow(win, chance, cb) {
     finalAngle = wE + 0.06 + Math.random()*loseArc;
   }
   finalAngle = ((finalAngle % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
-  const sa   = ((arrowAngle % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
-  let delta  = finalAngle - sa;
+
+  const sa = ((arrowAngle % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+  let delta = finalAngle - sa;
   if (delta < 0) delta += Math.PI*2;
   const total = (4 + Math.floor(Math.random()*3))*Math.PI*2 + delta;
-  const dur=3600, t0=performance.now(), startA=arrowAngle;
+
+  const dur = 3600, t0 = performance.now(), startA = arrowAngle;
+
   function frame(now) {
-    const t = Math.min((now-t0)/dur, 1);
-    const e = 1 - Math.pow(1-t, 3);
-    arrowAngle = startA + total*e;
-    drawAll(chance, arrowAngle);
-    if (t<1) requestAnimationFrame(frame);
-    else { arrowAngle = startA+total; drawAll(chance, arrowAngle); cb(); }
+    const t = Math.min((now - t0) / dur, 1);
+    const e = 1 - Math.pow(1 - t, 3);
+    arrowAngle = startA + total * e;
+    drawAll(currentChance, arrowAngle);
+    if (t < 1) requestAnimationFrame(frame);
+    else {
+      arrowAngle = startA + total;
+      drawAll(currentChance, arrowAngle);
+      cb();
+    }
   }
   requestAnimationFrame(frame);
 }
 
 function doUpgrade() {
   if (spinning) return;
-  const chance = getChance(); if (!chance) return;
+  const chance = getChance();
+  if (!chance) return;
+
   spinning = true;
   document.getElementById('btn-upgrade').disabled = true;
-  const win = Math.random()*100 < chance;
+
+  const win = Math.random() * 100 < chance;
+
   spinArrow(win, chance, () => {
     const fl = document.getElementById('result-flash');
-    document.getElementById('rf-bg').className = 'rf-bg '+(win?'win':'lose');
+    document.getElementById('rf-bg').className = 'rf-bg ' + (win ? 'win' : 'lose');
     const rt = document.getElementById('rf-text');
-    rt.className   = 'rf-text '+(win?'win':'lose');
+    rt.className = 'rf-text ' + (win ? 'win' : 'lose');
     rt.textContent = win ? 'АПГРЕЙД!' : 'ПРОВАЛ';
     document.getElementById('rf-sub').textContent = win
-      ? 'Получена: '+(allCards[selectedTo]?.name||'')
+      ? 'Получена: ' + (allCards[selectedTo]?.name || '')
       : 'Карточка потеряна навсегда';
-    if (win) { const i=inventory.indexOf(selectedFrom); if(i!==-1) inventory.splice(i,1); inventory.push(selectedTo); }
-    else     { const i=inventory.indexOf(selectedFrom); if(i!==-1) inventory.splice(i,1); }
-    saveData();
+
+    if (win) {
+      const i = inventory.indexOf(selectedFrom);
+      if (i !== -1) inventory.splice(i, 1);
+      inventory.push(selectedTo);
+    } else {
+      const i = inventory.indexOf(selectedFrom);
+      if (i !== -1) inventory.splice(i, 1);
+    }
+
+    saveInventory();   // ← отправка в бот
     fl.classList.add('show');
-    setTimeout(()=>{
+
+    setTimeout(() => {
       fl.classList.remove('show');
-      selectedFrom=null; selectedTo=null;
-      renderSlot(document.getElementById('slot-from'),null,'from');
-      renderSlot(document.getElementById('slot-to'),null,'to');
-      spinning=false; arrowAngle=Math.PI/2; updateUI();
+      selectedFrom = null;
+      selectedTo = null;
+      renderSlot(document.getElementById('slot-from'), null, 'from');
+      renderSlot(document.getElementById('slot-to'), null, 'to');
+      spinning = false;
+      arrowAngle = Math.PI / 2;
+      updateUI();
     }, 2800);
   });
 }
 
+// ==================== МОДАЛКИ И СЛОТЫ ====================
 function getEmoji(card) {
   if (!card) return '❓';
-  const m=(card.name||'').match(/^(\p{Emoji_Presentation}|\p{Extended_Pictographic})/u);
-  return m?m[0]:(RARITY_EMOJI[card.rarity]||'🃏');
+  const m = (card.name || '').match(/^(\p{Emoji_Presentation}|\p{Extended_Pictographic})/u);
+  return m ? m[0] : (RARITY_EMOJI[card.rarity] || '🃏');
 }
-function renderSlot(el,key,type) {
-  if (!key) { el.className='card-slot is-'+type; el.innerHTML='<div class="slot-empty">'+(type==='from'?'ТВОЯ<br>КАРТОЧКА':'ЦЕЛЬ<br>АПГРЕЙДА')+'</div>'; return; }
-  const c=allCards[key]; if(!c) return;
-  el.className='card-slot is-'+type+' has-card';
-  el.innerHTML='<div class="slot-emoji">'+getEmoji(c)+'</div><div class="slot-name">'+c.name+'</div><div class="slot-rarity '+(RARITY_CLASS[c.rarity]||'')+'">'+c.rarity+'</div>';
+
+function renderSlot(el, key, type) {
+  if (!key) {
+    el.className = 'card-slot is-' + type;
+    el.innerHTML = '<div class="slot-empty">' + (type === 'from' ? 'ТВОЯ<br>КАРТОЧКА' : 'ЦЕЛЬ<br>АПГРЕЙДА') + '</div>';
+    return;
+  }
+  const c = allCards[key];
+  if (!c) return;
+  el.className = 'card-slot is-' + type + ' has-card';
+  el.innerHTML = `<div class="slot-emoji">${getEmoji(c)}</div><div class="slot-name">${c.name}</div><div class="slot-rarity ${RARITY_CLASS[c.rarity]||''}">${c.rarity}</div>`;
 }
+
 function openModal(type) {
   if (spinning) return;
-  document.getElementById('modal-title').textContent = type==='from'?'Твоя карточка':'Цель апгрейда';
-  const list=document.getElementById('modal-list'); list.innerHTML='';
-  if (type==='from') {
-    const counts={}; inventory.forEach(k=>counts[k]=(counts[k]||0)+1);
-    const keys=Object.keys(counts).sort((a,b)=>RARITY_ORDER.indexOf(allCards[a]?.rarity)-RARITY_ORDER.indexOf(allCards[b]?.rarity));
-    if (!keys.length) { list.innerHTML='<div class="no-cards">ИНВЕНТАРЬ ПУСТ</div>'; }
-    else keys.forEach(k=>{const el=buildMC(allCards[k],k,counts[k]);el.onclick=()=>pickFrom(k);list.appendChild(el);});
+  document.getElementById('modal-title').textContent = type === 'from' ? 'Твоя карточка' : 'Цель апгрейда';
+  const list = document.getElementById('modal-list');
+  list.innerHTML = '';
+
+  if (type === 'from') {
+    const counts = {};
+    inventory.forEach(k => counts[k] = (counts[k] || 0) + 1);
+    const keys = Object.keys(counts).sort((a, b) => RARITY_ORDER.indexOf(allCards[a]?.rarity) - RARITY_ORDER.indexOf(allCards[b]?.rarity));
+
+    if (!keys.length) {
+      list.innerHTML = '<div class="no-cards">ИНВЕНТАРЬ ПУСТ</div>';
+    } else {
+      keys.forEach(k => {
+        const el = buildMC(allCards[k], k, counts[k]);
+        el.onclick = () => pickFrom(k);
+        list.appendChild(el);
+      });
+    }
   } else {
-    const fw=selectedFrom?(RARITY_WEIGHT[allCards[selectedFrom]?.rarity]||999):999;
-    const tgts=Object.entries(allCards).filter(([,v])=>(RARITY_WEIGHT[v.rarity]||0)<fw).sort((a,b)=>RARITY_ORDER.indexOf(a[1].rarity)-RARITY_ORDER.indexOf(b[1].rarity));
-    if (!tgts.length) { list.innerHTML='<div class="no-cards">'+(selectedFrom?'НЕТ КАРТОЧЕК РЕДЧЕ':'СНАЧАЛА ВЫБЕРИ СВОЮ КАРТОЧКУ')+'</div>'; }
-    else tgts.forEach(([k,v])=>{const el=buildMC(v,k,null);el.onclick=()=>pickTo(k);list.appendChild(el);});
+    const fw = selectedFrom ? (RARITY_WEIGHT[allCards[selectedFrom]?.rarity] || 999) : 999;
+    const tgts = Object.entries(allCards).filter(([,v]) => (RARITY_WEIGHT[v.rarity] || 0) < fw)
+      .sort((a, b) => RARITY_ORDER.indexOf(a[1].rarity) - RARITY_ORDER.indexOf(b[1].rarity));
+
+    if (!tgts.length) {
+      list.innerHTML = '<div class="no-cards">' + (selectedFrom ? 'НЕТ КАРТОЧЕК РЕДЧЕ' : 'СНАЧАЛА ВЫБЕРИ СВОЮ КАРТОЧКУ') + '</div>';
+    } else {
+      tgts.forEach(([k, v]) => {
+        const el = buildMC(v, k, null);
+        el.onclick = () => pickTo(k);
+        list.appendChild(el);
+      });
+    }
   }
   document.getElementById('modal-bg').classList.add('open');
 }
-function buildMC(card,key,count) {
-  const el=document.createElement('div'); el.className='mc';
-  el.innerHTML='<div class="mc-emoji">'+getEmoji(card)+'</div><div class="mc-info"><div class="mc-name">'+card.name+'</div><div class="mc-rarity '+(RARITY_CLASS[card.rarity]||'')+'">'+card.rarity+'</div></div>'+(count!==null?'<div class="mc-count">x'+count+'</div>':'');
+
+function buildMC(card, key, count) {
+  const el = document.createElement('div');
+  el.className = 'mc';
+  el.innerHTML = `<div class="mc-emoji">${getEmoji(card)}</div>
+    <div class="mc-info">
+      <div class="mc-name">${card.name}</div>
+      <div class="mc-rarity ${RARITY_CLASS[card.rarity]||''}">${card.rarity}</div>
+    </div>
+    ${count !== null ? `<div class="mc-count">x${count}</div>` : ''}`;
   return el;
 }
-function pickFrom(k){selectedFrom=k;renderSlot(document.getElementById('slot-from'),k,'from');if(selectedTo&&!getChance()){selectedTo=null;renderSlot(document.getElementById('slot-to'),null,'to');}closeModal();updateUI();}
-function pickTo(k){selectedTo=k;renderSlot(document.getElementById('slot-to'),k,'to');closeModal();updateUI();}
-function closeModal(){document.getElementById('modal-bg').classList.remove('open');}
-function closeBg(e){if(e.target===document.getElementById('modal-bg'))closeModal();}
 
-async function loadCards(){
-  try{const r=await fetch('cards.json');allCards=await r.json();}catch(e){
-    allCards={"card_001":{"name":"🇫🇷 Саркози","rarity":"Обычный"},"card_002":{"name":"🇸🇰 Пеллегрини","rarity":"Обычный"},"card_006":{"name":"🇮🇷 Хаменеи","rarity":"Редкий"},"card_007":{"name":"🇩🇪 Шольц","rarity":"Редкий"},"card_009":{"name":"🇺🇸 Обама","rarity":"Очень редкий"},"card_015":{"name":"🇰🇵 Ким Чен Ын","rarity":"Странный"},"card_018":{"name":"🇺🇦 Зеленский","rarity":"Легендарный"},"card_019":{"name":"🇷🇺 Путин","rarity":"Легендарный"},"card_020":{"name":"🇺🇸 Трамп","rarity":"Легендарный"},"card_021":{"name":"🇮🇱 Нетаньяху","rarity":"Еврей"},"card_022":{"name":"🇽🇰 Вьоса","rarity":"Хуесос"}};
+function pickFrom(k) {
+  selectedFrom = k;
+  renderSlot(document.getElementById('slot-from'), k, 'from');
+  if (selectedTo && !getChance()) {
+    selectedTo = null;
+    renderSlot(document.getElementById('slot-to'), null, 'to');
+  }
+  closeModal();
+  updateUI();
+}
+
+function pickTo(k) {
+  selectedTo = k;
+  renderSlot(document.getElementById('slot-to'), k, 'to');
+  closeModal();
+  updateUI();
+}
+
+function closeModal() {
+  document.getElementById('modal-bg').classList.remove('open');
+}
+
+function closeBg(e) {
+  if (e.target === document.getElementById('modal-bg')) closeModal();
+}
+
+// ==================== ЗАГРУЗКА ДАННЫХ ====================
+async function loadCards() {
+  try {
+    const r = await fetch('cards.json');
+    allCards = await r.json();
+  } catch (e) {
+    console.warn("cards.json не найден, используем заглушку");
+    allCards = {"card_001":{"name":"🇫🇷 Саркози","rarity":"Обычный"},"card_002":{"name":"🇸🇰 Пеллегрини","rarity":"Обычный"},"card_006":{"name":"🇮🇷 Хаменеи","rarity":"Редкий"},"card_007":{"name":"🇩🇪 Шольц","rarity":"Редкий"},"card_009":{"name":"🇺🇸 Обама","rarity":"Очень редкий"},"card_015":{"name":"🇰🇵 Ким Чен Ын","rarity":"Странный"},"card_018":{"name":"🇺🇦 Зеленский","rarity":"Легендарный"},"card_019":{"name":"🇷🇺 Путин","rarity":"Легендарный"},"card_020":{"name":"🇺🇸 Трамп","rarity":"Легендарный"},"card_021":{"name":"🇮🇱 Нетаньяху","rarity":"Еврей"},"card_022":{"name":"🇽🇰 Вьоса","rarity":"Хуесос"}};
   }
 }
-function loadData(){
-  if(!userId){inventory=['card_001','card_001','card_006','card_009','card_015','card_018','card_021'];return;}
-  try{inventory=JSON.parse(localStorage.getItem('inv_'+userId)||'[]');}catch(e){inventory=[];}
+
+async function loadInventory() {
+  if (!userId) {
+    inventory = ['card_001','card_001','card_006','card_009','card_015','card_018','card_021'];
+    return;
+  }
+
+  tg.sendData(JSON.stringify({
+    action: "get_inventory",
+    initData: tg.initData
+  }));
 }
-function saveData(){
-  if(!userId)return;
-  try{localStorage.setItem('inv_'+userId,JSON.stringify(inventory));}catch(e){}
+
+function saveInventory() {
+  if (!userId) return;
+  tg.sendData(JSON.stringify({
+    action: "update_inventory",
+    initData: tg.initData,
+    inventory: inventory
+  }));
 }
-(async()=>{await loadCards();loadData();drawAll(null,arrowAngle);})();
+
+// ==================== ЗАПУСК ====================
+(async () => {
+  await loadCards();
+  await loadInventory();
+
+  // Слушаем ответ от бота
+  tg.onEvent('webAppDataReceived', (data) => {
+    try {
+      const payload = JSON.parse(data);
+      if (payload.inventory && Array.isArray(payload.inventory)) {
+        inventory = payload.inventory;
+        console.log("Инвентарь получен от бота:", inventory);
+      }
+    } catch (e) { console.error(e); }
+  });
+
+  drawAll(null, arrowAngle);
+})();
 </script>
 </body>
 </html>
