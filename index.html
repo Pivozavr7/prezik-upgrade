@@ -69,7 +69,6 @@ body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; 
   <div class="logo">PREZIK UP</div>
   <div class="header-user" id="uid">@USER</div>
 </div>
-
 <div class="page">
   <div class="cards-row">
     <div class="card-slot is-from" id="slot-from" onclick="openModal('from')"><div class="slot-empty">ТВОЯ<br>КАРТОЧКА</div></div>
@@ -81,13 +80,11 @@ body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; 
   </div>
   <button class="btn-upgrade" id="btn-upgrade" disabled onclick="doUpgrade()">ПРОКАЧАТЬ</button>
 </div>
-
 <div class="result-flash" id="result-flash">
   <div class="rf-bg" id="rf-bg"></div>
   <div class="rf-text" id="rf-text"></div>
   <div class="rf-sub" id="rf-sub"></div>
 </div>
-
 <div class="modal-bg" id="modal-bg" onclick="closeBg(event)">
   <div class="modal">
     <div class="modal-header">
@@ -99,6 +96,7 @@ body { background:var(--bg); color:var(--text); font-family:'Inter',sans-serif; 
 </div>
 
 <script>
+// ==================== ИНИЦИАЛИЗАЦИЯ ====================
 const tg = window.Telegram?.WebApp || {};
 if (tg) {
   tg.expand();
@@ -158,11 +156,9 @@ function drawAll(chance, arrow) {
     ctx.arc(CX, CY, R, a1, a2);
     ctx.strokeStyle = `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
     ctx.lineWidth = RW;
-    ctx.lineCap = 'butt';
     ctx.stroke();
   }
 
-  // центр
   ctx.beginPath();
   ctx.arc(CX, CY, R - RW/2 - 1, 0, Math.PI*2);
   ctx.fillStyle = '#0d0f14';
@@ -198,7 +194,6 @@ function drawChanceText(chance) {
   ctx.textBaseline = 'middle';
   ctx.fillStyle = chance ? '#e8eaf0' : '#2a2f3a';
   ctx.fillText(text, CX, CY - 10);
-
   ctx.font = '10px Inter';
   ctx.fillStyle = '#2a2f3a';
   ctx.fillText('ШАНС УСПЕХА', CX, CY + 18);
@@ -225,9 +220,7 @@ function spinArrow(win, chance, cb) {
   const mid = Math.PI/2;
   const wS = mid - half;
   const wE = mid + half;
-  let finalAngle = win
-    ? wS + 0.06 + Math.random()*(half*2 - 0.12)
-    : wE + 0.06 + Math.random()*(Math.PI*2 - half*2 - 0.12);
+  let finalAngle = win ? wS + 0.06 + Math.random()*(half*2 - 0.12) : wE + 0.06 + Math.random()*(Math.PI*2 - half*2 - 0.12);
   finalAngle = ((finalAngle % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
 
   const sa = ((arrowAngle % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
@@ -419,8 +412,7 @@ function doUpgrade() {
     }
   }
 
-  // Первоначальная отрисовка
-  updateUI();
+  updateUI();   // ← это важно!
 })();
 </script>
 </body>
