@@ -388,36 +388,26 @@ function doUpgrade() {
       if (i !== -1) inventory.splice(i, 1);
     }
 
-    // === ФИНАЛЬНАЯ ОТПРАВКА ===
+    // Отправка данных
     if (window.Telegram?.WebApp) {
       const payload = {
         action: "upgrade_result",
         inventory: inventory,
         user_id: userId
       };
-
-      try {
-        window.Telegram.WebApp.sendData(JSON.stringify(payload));
-      } catch (e) {
-        console.error("sendData error:", e);
-      }
-
-      // Принудительное закрытие (самое надёжное)
-      setTimeout(() => {
-        if (window.Telegram?.WebApp) {
-          window.Telegram.WebApp.close();
-        }
-      }, 900);
+      window.Telegram.WebApp.sendData(JSON.stringify(payload));
     }
 
     fl.classList.add('show');
+
+    // Закрываем после показа результата
     setTimeout(() => {
-      fl.classList.remove('show');
-      spinning = false;
-    }, 2800);
+      if (window.Telegram?.WebApp) {
+        window.Telegram.WebApp.close();
+      }
+    }, 3000);
   });
 }
-
 // ==================== ЗАПУСК ====================
 (async () => {
   await loadCards();
