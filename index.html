@@ -125,7 +125,6 @@ const ctx = canvas.getContext('2d');
 const CX = 160, CY = 165, R = 110, RW = 22;
 let arrowAngle = Math.PI / 2;
 
-// === РИСОВАНИЕ КОЛЕСА (полностью твоя логика) ===
 function drawAll(chance, arrow) {
   ctx.clearRect(0, 0, 320, 380);
   const steps = 180;
@@ -154,7 +153,6 @@ function drawAll(chance, arrow) {
       g = 61 + (255 - 61) * gf;
       b = 28 + (114 - 28) * gf;
     }
-
     ctx.beginPath();
     ctx.arc(CX, CY, R, a1, a2);
     ctx.strokeStyle = `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
@@ -168,7 +166,6 @@ function drawAll(chance, arrow) {
   ctx.fillStyle = '#0d0f14';
   ctx.fill();
 
-  // стрелка
   const rTip = R + RW/2 + 1;
   const rOuter = R + RW/2 + 14;
   const hw = 9;
@@ -221,9 +218,7 @@ function updateUI() {
   drawAll(chance, arrowAngle);
 }
 
-// === СПИН ===
 function spinArrow(win, chance, cb) {
-  // ... (твоя полная функция спина осталась без изменений)
   const half = (chance/100) * Math.PI;
   const mid = Math.PI/2;
   const wS = mid - half;
@@ -246,12 +241,15 @@ function spinArrow(win, chance, cb) {
     arrowAngle = startA + total * e;
     drawAll(getChance(), arrowAngle);
     if (t < 1) requestAnimationFrame(frame);
-    else { arrowAngle = startA + total; drawAll(getChance(), arrowAngle); cb(); }
+    else {
+      arrowAngle = startA + total;
+      drawAll(getChance(), arrowAngle);
+      cb();
+    }
   }
   requestAnimationFrame(frame);
 }
 
-// === ОСНОВНЫЕ ФУНКЦИИ (модалки, слоты и т.д.) ===
 function getEmoji(card) {
   if (!card) return '❓';
   const m = (card.name || '').match(/^(\p{Emoji_Presentation}|\p{Extended_Pictographic})/u);
@@ -270,10 +268,11 @@ function renderSlot(el, key, type) {
   el.innerHTML = `<div class="slot-emoji">${getEmoji(c)}</div><div class="slot-name">${c.name}</div><div class="slot-rarity ${RARITY_CLASS[c.rarity]||''}">${c.rarity}</div>`;
 }
 
-function openModal(type) { /* полная функция из твоего оригинала */ 
-  // (я оставил её полной, но чтобы не растягивать сообщение — она идентична твоей)
+function openModal(type) {
+  if (spinning) return;
   document.getElementById('modal-title').textContent = type==='from'?'Твоя карточка':'Цель апгрейда';
   const list = document.getElementById('modal-list'); list.innerHTML = '';
+
   if (type==='from') {
     const counts = {};
     inventory.forEach(k => counts[k] = (counts[k]||0)+1);
@@ -285,7 +284,6 @@ function openModal(type) { /* полная функция из твоего ор
       list.appendChild(el);
     });
   } else {
-    // ... (остальная часть твоей функции openModal)
     const fw = selectedFrom ? (RARITY_WEIGHT[allCards[selectedFrom]?.rarity]||999) : 999;
     const tgts = Object.entries(allCards).filter(([,v]) => (RARITY_WEIGHT[v.rarity]||0) < fw)
       .sort((a,b) => RARITY_ORDER.indexOf(a[1].rarity) - RARITY_ORDER.indexOf(b[1].rarity));
@@ -310,13 +308,12 @@ function pickTo(k){ selectedTo = k; renderSlot(document.getElementById('slot-to'
 function closeModal(){ document.getElementById('modal-bg').classList.remove('open'); }
 function closeBg(e){ if(e.target === document.getElementById('modal-bg')) closeModal(); }
 
-// === ЗАГРУЗКА ===
 async function loadCards(){
   try{ const r = await fetch('cards.json'); allCards = await r.json(); }
   catch(e){ console.warn("cards.json не найден"); }
 }
 
-async function loadInventory(){
+function loadInventory(){
   if (!userId) return;
   tg.sendData(JSON.stringify({ action: "get_inventory", initData: tg.initData }));
 }
@@ -352,6 +349,7 @@ function doUpgrade() {
 
     saveInventory();
     fl.classList.add('show');
+
     setTimeout(() => {
       fl.classList.remove('show');
       selectedFrom = selectedTo = null;
@@ -364,17 +362,16 @@ function doUpgrade() {
   });
 }
 
-// === СТАРТ ===
 (async () => {
   await loadCards();
-  await loadInventory();
+  loadInventory();
 
   tg.onEvent('webAppDataReceived', (data) => {
     try {
       const payload = JSON.parse(data);
       if (payload.inventory && Array.isArray(payload.inventory)) {
         inventory = payload.inventory;
-        console.log("Инвентарь загружен:", inventory);
+        console.log("Инвентарь загружен из about/", inventory);
       }
     } catch(e) {}
   });
