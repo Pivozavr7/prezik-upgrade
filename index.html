@@ -202,12 +202,16 @@ function openModal(type) {
 function buildMC(card, key, count) {
   const el = document.createElement('div');
   el.className = 'mc';
+
+  const emoji = getEmoji(card);
   const countHtml = (count && count > 1) ? `<div class="mc-count">x${count}</div>` : '';
-  el.innerHTML = `<div class="mc-emoji">${getEmoji(card)}</div>
+
+  el.innerHTML = `<div class="mc-emoji">${emoji}</div>
                   <div class="mc-info">
                     <div class="mc-name">${card.name}</div>
                     <div class="mc-rarity ${RARITY_CLASS[card.rarity]||''}">${card.rarity}</div>
                   </div>${countHtml}`;
+
   return el;
 }
 
