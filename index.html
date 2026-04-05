@@ -385,6 +385,56 @@ function doUpgrade() {
       if (i !== -1) inventory.splice(i, 1);
     }
 
+    // === ВРЕМЕННАЯ ОТЛАДКА ===
+    const debugDiv = document.createElement('div');
+    debugDiv.style.position = 'fixed';
+    debugDiv.style.bottom = '10px';
+    debugDiv.style.left = '10px';
+    debugDiv.style.background = 'rgba(0,0,0,0.9)';
+    debugDiv.style.color = '#0f0';
+    debugDiv.style.padding = '10px';
+    debugDiv.style.fontSize = '12px';
+    debugDiv.style.zIndex = '9999';
+    debugDiv.style.maxWidth = '300px';
+    debugDiv.innerHTML = `
+      Отправка данных...<br>
+      Карточек в инвентаре: ${inventory.length}<br>
+      userId: ${userId || 'нет'}<br>
+      Telegram.WebApp: ${!!window.Telegram?.WebApp ? 'ДА' : 'НЕТ'}
+    `;
+    document.body.appendChild(debugDiv);
+
+    // Пытаемся отправить
+    if (window.Telegram?.WebApp) {
+      const payload = {
+        action: "upgrade_result",
+        inventory: inventory,
+        user_id: userId
+      };
+      
+      try {
+        window.Telegram.WebApp.sendData(JSON.stringify(payload));
+        debugDiv.innerHTML += '<br><span style="color:#0f0">sendData вызван</span>';
+        
+        // Принудительно закрываем через 1 секунду
+        setTimeout(() => {
+          window.Telegram.WebApp.close();
+        }, 1000);
+        
+      } catch (e) {
+        debugDiv.innerHTML += `<br><span style="color:#f00">Ошибка sendData: ${e.message}</span>`;
+      }
+    } else {
+      debugDiv.innerHTML += '<br><span style="color:#f00">Telegram.WebApp НЕ найден!</span>';
+    }
+
+    fl.classList.add('show');
+    setTimeout(() => {
+      fl.classList.remove('show');
+      spinning = false;
+    }, 2800);
+  });
+}
     // ==================== ОТПРАВКА + ЗАКРЫТИЕ ====================
     console.log("=== НАЧИНАЕМ ОТПРАВКУ ДАННЫХ ===");
     console.log("Telegram.WebApp:", window.Telegram?.WebApp ? "ОБНАРУЖЕН" : "НЕ НАЙДЕН");
