@@ -378,11 +378,11 @@ function doUpgrade() {
 (async () => {
   await loadCards();
 
-  if (userId) {
-    try {
-      const saved = localStorage.getItem('inv_' + userId);
-      if (saved) inventory = JSON.parse(saved);
-    } catch(e) {}
+  // Читаем инвентарь из URL параметра
+  const params = new URLSearchParams(window.location.search);
+  const invParam = params.get('inv');
+  if (invParam) {
+    try { inventory = JSON.parse(decodeURIComponent(invParam)); } catch(e) {}
   }
 
   drawAll(null, arrowAngle);
