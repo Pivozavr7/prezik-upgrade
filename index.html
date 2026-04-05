@@ -361,11 +361,13 @@ function doUpgrade() {
     }, 2800);
   });
 }
-
 <script>
-// ... (весь твой код выше до этого момента остаётся) ...
+const tg = window.Telegram?.WebApp || {};
+if (tg) tg.expand();
 
-// ==================== РАБОЧИЙ ЗАПУСК ЧЕРЕЗ LOCALSTORAGE ====================
+const userId = tg.initDataUnsafe?.user?.id || null;
+
+// ==================== ПРОСТОЙ ЗАПУСК ====================
 (async () => {
   await loadCards();
 
@@ -377,20 +379,19 @@ function doUpgrade() {
   }
 
   if (inventory.length === 0) {
-    inventory = ['card_001', 'card_006', 'card_009', 'card_018', 'card_021'];
+    inventory = ['card_001','card_006','card_009','card_018','card_021'];
   }
 
-  alert(`✅ WebApp запущен!\n\nКарт в инвентаре: ${inventory.length}`);
+  alert(`✅ Работает!\nКарт в инвентаре: ${inventory.length}`);
 
   // Автосохранение
-  const originalSave = saveInventory;
   saveInventory = function() {
     if (userId) localStorage.setItem('inv_' + userId, JSON.stringify(inventory));
-    if (originalSave) originalSave();
   };
 
   drawAll(null, arrowAngle);
 })();
+</script>
 
 </script>
 </body>
