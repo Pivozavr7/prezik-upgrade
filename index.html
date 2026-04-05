@@ -131,7 +131,20 @@ function drawChanceText(chance) { /* ... без изменений ... */ }
 function getChance() { /* ... без изменений ... */ }
 function updateUI() { /* ... без изменений ... */ }
 function spinArrow(win, chance, cb) { /* ... без изменений ... */ }
-function getEmoji(card) { /* ... без изменений ... */ }
+function getEmoji(card) {
+  if (!card || !card.name) return '🃏';
+
+  // Берём первый символ (или первые два), если это флаг или эмодзи
+  const name = card.name.trim();
+  const emojiMatch = name.match(/^(\p{Emoji_Presentation}|\p{Extended_Pictographic}|\uD83C[\uDDE6-\uDDFF]{2})/u);
+  
+  if (emojiMatch) {
+    return emojiMatch[0];
+  }
+
+  // Если не нашлось — берём эмодзи по редкости
+  return RARITY_EMOJI[card.rarity] || '🃏';
+}
 function renderSlot(el, key, type) { /* ... без изменений ... */ }
 
 // ==================== ИСПРАВЛЕННЫЕ ФУНКЦИИ ====================
