@@ -362,18 +362,37 @@ function doUpgrade() {
   });
 }
 
+// ==================== ЗАПУСК ====================
 (async () => {
   await loadCards();
-  loadInventory();
 
+  console.log("WebApp запущен. User ID:", userId);
+
+  if (userId) {
+    console.log("📤 Запрашиваем инвентарь у бота...");
+    loadInventory();
+  } else {
+    console.log("⚠️ Тестовый режим без Telegram");
+    inventory = ['card_001', 'card_006', 'card_009', 'card_018', 'card_021'];
+  }
+
+  // Слушаем ответ от бота
   tg.onEvent('webAppDataReceived', (data) => {
     try {
       const payload = JSON.parse(data);
-      if (payload.inventory && Array.isArray(payload.inventory)) {
+      if (payload && payload.inventory && Array.isArray(payload.inventory)) {
         inventory = payload.inventory;
-        console.log("Инвентарь загружен из about/", inventory);
+        console.log(`✅ Инвентарь успешно загружен! Всего карт: ${inventory.length}`);
+        console.log("Содержимое:", inventory);
+        
+        // Обновляем интерфейс после загрузки
+        updateUI();
+      } else {
+        console.warn("Ответ от бота пришёл, но inventory не найден");
       }
-    } catch(e) {}
+    } catch (e) {
+      console.error("❌ Ошибка при обработке ответа от бота:", e);
+    }
   });
 
   drawAll(null, arrowAngle);
