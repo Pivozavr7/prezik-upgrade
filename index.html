@@ -385,9 +385,34 @@ function doUpgrade() {
       if (i !== -1) inventory.splice(i, 1);
     }
 
+    // ==================== ОТПРАВКА + ЗАКРЫТИЕ ====================
+    console.log("=== НАЧИНАЕМ ОТПРАВКУ ДАННЫХ ===");
+    console.log("Telegram.WebApp:", window.Telegram?.WebApp ? "ОБНАРУЖЕН" : "НЕ НАЙДЕН");
+
     if (window.Telegram?.WebApp) {
-      const payload = { action: "upgrade_result", inventory: inventory, user_id: userId };
-      window.Telegram.WebApp.sendData(JSON.stringify(payload));
+      const payload = {
+        action: "upgrade_result",
+        inventory: inventory,
+        user_id: userId
+      };
+      const jsonData = JSON.stringify(payload);
+
+      console.log("Отправляемые данные:", jsonData);
+
+      try {
+        window.Telegram.WebApp.sendData(jsonData);
+        console.log("✅ sendData() вызван успешно");
+      } catch (e) {
+        console.error("❌ Ошибка sendData:", e);
+      }
+
+      // Принудительно закрываем WebApp через 800мс (на случай, если sendData не сработал)
+      setTimeout(() => {
+        console.log("🔒 Принудительно закрываем WebApp");
+        window.Telegram.WebApp.close();
+      }, 800);
+    } else {
+      console.error("❌ Telegram.WebApp не найден!");
     }
 
     fl.classList.add('show');
